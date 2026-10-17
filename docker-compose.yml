@@ -1,0 +1,37 @@
+version: '3.8'
+
+name: ai_assistant_project
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ai_assistant_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+
+  redis:
+    image: redis:7-alpine
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=ai_assistant_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgrespassword
+      - DB_HOST=db
+      - DB_PORT=5432
+      - OPENAI_API_KEY=your_openai_api_key_here
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
